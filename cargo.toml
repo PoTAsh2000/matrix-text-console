@@ -1,0 +1,7 @@
+[package]
+name = "matrix-text-console"
+version = "1.89.0"
+edition = "2024"
+
+[dependencies]
+colored = "2.0"
