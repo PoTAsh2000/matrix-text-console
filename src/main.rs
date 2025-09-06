@@ -13,8 +13,8 @@ use colored::Colorize;
 fn main() {
     std::process::Command::new("clear").status().unwrap();
     // Getting teminal data
-    let mut row_count: u16 = 7;
-    let mut column_count: u16 = 100;
+    let mut row_count: u16 = 40;
+    let mut column_count: u16 = 150;
     // if let Some((Width(width), Height(height))) = terminal_size() {
     //     column_count = width;
     //     row_count = height;
@@ -37,15 +37,18 @@ fn main() {
         column_data_map.insert(i, column);
     }
 
+    let mut row_manager: VecDeque<String> = VecDeque::new();
+
     for i in 0..50 {
-        std::process::Command::new("clear").status().unwrap();
-        let mut terminal_content: String = "".to_string();
         for r in 0u16..row_count {
+            std::process::Command::new("clear").status().unwrap();
+            let mut row_content: String = "".to_string();
+
             for c in 0u16..column_count {
                 let mut current_column: Col = column_data_map.get(&c).unwrap().clone();
                 
                 if let Some(queue_value) = current_column.char_queue.pop_front() {
-                    terminal_content = terminal_content + &queue_value;
+                    row_content = row_content + &queue_value;
                 }
 
                 current_column.update_column_state();
@@ -54,13 +57,21 @@ fn main() {
                 column_data_map.insert(c, current_column);
             }
 
-            terminal_content = terminal_content + "\n";
+            row_manager.push_front(row_content);
+
+            if row_manager.len() >= row_count.into() {
+                let mut matrix_console: String = "".to_string();
+                for (_i, item) in row_manager.iter().enumerate() {
+                    matrix_console = matrix_console + item + "\n";
+                }
+                println!("{}", matrix_console.green());
+
+                let sleep_timer = time::Duration::from_millis(250);
+                thread::sleep(sleep_timer);
+
+                row_manager.pop_back();
+            }
         }
-
-        println!("{}", terminal_content.green());
-
-        let sleep_timer = time::Duration::from_millis(2000);
-        thread::sleep(sleep_timer);
     }
 
 
