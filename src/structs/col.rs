@@ -3,8 +3,8 @@ mod support;
 use crate::functions;
 use std::collections::VecDeque;
 
-pub static WHITESPACE_SEQ_LEN_MIN_MAX: [u8; 2] = [4, 7];
-pub static CHARACTER_SEQ_LEN_MIN_MAX: [u8; 2] = [6, 11];
+pub static WHITESPACE_SEQ_LEN_MIN_MAX: [u8; 2] = [4, 8];
+pub static CHARACTER_SEQ_LEN_MIN_MAX: [u8; 2] = [5, 9];
 
 #[derive(Clone)]
 pub struct Col {
@@ -32,12 +32,12 @@ impl Col {
         }
     }
 
-    pub fn print_all(&self) {
+    pub fn print_all(&self, row: u16, column: u16) {
         let mut queue_values: String = "".to_string();
         for (i, item) in self.char_queue.iter().enumerate() {
             queue_values = queue_values + item;
         }
-        println!("queue: {}", queue_values);
+        println!("queue on row[{}], column[{}]: {}",row, column, queue_values);
     }
 
     pub fn update_column_state(&mut self) {
