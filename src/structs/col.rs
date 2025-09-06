@@ -24,7 +24,7 @@ impl Col {
 
     pub fn initiate_queue(&mut self, row_count: u16) {
         for _i in 0..row_count {
-            let mut random_character = functions::get_random_character(self.on_whitespace_timeout);
+            let random_character = functions::get_random_character(self.on_whitespace_timeout);
 
             self.update_column_state();
 
@@ -34,7 +34,7 @@ impl Col {
 
     pub fn print_all(&self, row: u16, column: u16) {
         let mut queue_values: String = "".to_string();
-        for (i, item) in self.char_queue.iter().enumerate() {
+        for (_i, item) in self.char_queue.iter().enumerate() {
             queue_values = queue_values + item;
         }
         println!("queue on row[{}], column[{}]: {}",row, column, queue_values);

@@ -12,17 +12,12 @@ use colored::Colorize;
 
 fn main() {
     std::process::Command::new("clear").status().unwrap();
-    // Getting teminal data
-    let mut row_count: u16 = 40;
-    let mut column_count: u16 = 150;
-    // if let Some((Width(width), Height(height))) = terminal_size() {
-    //     column_count = width;
-    //     row_count = height;
-    //     println!("Terminal width: {} columns", &width);
-    //     println!("Terminal height: {} rows", &height);
-    // }
+    
+    // Setting the amount for rows and columns
+    let row_count: u16 = 40;
+    let column_count: u16 = 150;
 
-    // Initiating column queues
+    // Initiating column data
     let mut column_data_map: HashMap<u16, Col> = HashMap::new();
     for i in 0u16..column_count {
         let col_start_on_witespace_timeout: bool = functions::get_rnd_bool();
@@ -37,26 +32,29 @@ fn main() {
         column_data_map.insert(i, column);
     }
 
+    // row manager to update and keep track of the content for each row 
     let mut row_manager: VecDeque<String> = VecDeque::new();
 
-    for i in 0..50 {
-        for r in 0u16..row_count {
+    for _i in 0..50 {
+        for _r in 0u16..row_count {
+            // Before processing a new row, clear the terminal content
             std::process::Command::new("clear").status().unwrap();
-            let mut row_content: String = "".to_string();
 
+            // Create row content and update column states
+            let mut row_content: String = "".to_string();
             for c in 0u16..column_count {
+                // Create row content
                 let mut current_column: Col = column_data_map.get(&c).unwrap().clone();
-                
                 if let Some(queue_value) = current_column.char_queue.pop_front() {
                     row_content = row_content + &queue_value;
                 }
 
+                // Update column state
                 current_column.update_column_state();
                 current_column.char_queue.push_back(functions::get_random_character(current_column.on_whitespace_timeout));
                 column_data_map.remove(&c);
                 column_data_map.insert(c, current_column);
             }
-
             row_manager.push_front(row_content);
 
             if row_manager.len() >= row_count.into() {
@@ -74,10 +72,9 @@ fn main() {
         }
     }
 
-
-    let mut stdin = io::stdin();
+    // Keep the console open
+    let stdin = io::stdin();
     let input = &mut String::new();
-
     loop {
         input.clear();
         let _ = stdin.read_line(input);
