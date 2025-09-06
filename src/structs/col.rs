@@ -33,14 +33,11 @@ impl Col {
     }
 
     pub fn print_all(&self) {
-        if self.char_queue.is_empty() {
-            println!("Queue is empty.");
-        } 
-        else {
-            for (i, item) in self.char_queue.iter().enumerate() {
-                println!("{}: {}", i, item);
-            }
+        let mut queue_values: String = "".to_string();
+        for (i, item) in self.char_queue.iter().enumerate() {
+            queue_values = queue_values + item;
         }
+        println!("queue: {}", queue_values);
     }
 
     pub fn update_column_state(&mut self) {
