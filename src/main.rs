@@ -4,7 +4,6 @@ mod support;
 use std::{io, thread, time};
 use std::collections::HashMap;
 use std::collections::VecDeque;
-// use terminal_size::{terminal_size, Width, Height};
 use crate::support::functions;
 use structs::col::Col;
 use structs::col::WHITESPACE_SEQ_LEN_MIN_MAX;
@@ -14,7 +13,7 @@ use colored::Colorize;
 fn main() {
     std::process::Command::new("clear").status().unwrap();
     // Getting teminal data
-    let mut row_count: u16 = 20;
+    let mut row_count: u16 = 7;
     let mut column_count: u16 = 100;
     // if let Some((Width(width), Height(height))) = terminal_size() {
     //     column_count = width;
@@ -60,46 +59,19 @@ fn main() {
 
         println!("{}", terminal_content.green());
 
-        let sleep_timer = time::Duration::from_millis(4000);
+        let sleep_timer = time::Duration::from_millis(2000);
         thread::sleep(sleep_timer);
     }
 
-    
 
     let mut stdin = io::stdin();
     let input = &mut String::new();
 
     loop {
         input.clear();
-        stdin.read_line(input);
+        let _ = stdin.read_line(input);
         println!("{}", input);
     }
-
-
-
-
-
-
-    // let mut terminal_content: String = "".to_string();
-    // for _r in 0u16..row_count {
-    //     let mut copy_col_map = column_data_map.clone();
-
-    //     for c in 0u16..column_count {
-    //         let mut current_column: &Col = copy_col_map.get(&c).unwrap();
-    //         current_column.print_all();
-    //         let mut column_queue: VecDeque<String> = copy_col_map.get(&c).unwrap().char_queue.clone();
-
-    //         if let Some(queue_value) = column_queue.pop_front() {
-    //             terminal_content = terminal_content + &queue_value;
-    //         }
-    //     }
-        
-    //     // terminal_content = terminal_content + "\n";
-
-
-    // }
-
-    // println!("{terminal_content}");
 }
 
 fn get_whitespace_seq_len() -> (u8, u8) {
