@@ -3,9 +3,10 @@ mod support;
 use crate::functions;
 use std::collections::VecDeque;
 
-pub static WHITESPACE_SEQ_LEN_MIN_MAX: [u8; 2] = [3, 6];
-pub static CHARACTER_SEQ_LEN_MIN_MAX: [u8; 2] = [6, 13];
+pub static WHITESPACE_SEQ_LEN_MIN_MAX: [u8; 2] = [4, 7];
+pub static CHARACTER_SEQ_LEN_MIN_MAX: [u8; 2] = [6, 11];
 
+#[derive(Clone)]
 pub struct Col {
     pub char_queue: VecDeque<String>,
     pub seq_len: u8,
@@ -22,26 +23,13 @@ impl Col {
     }
 
     pub fn initiate_queue(&mut self, row_count: u16) {
-        let characters: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~`'&%".to_string();
-        for i in 0..characters.len() {
-            let mut random_character = "".to_string();
-
-            let rnd_char_index: usize = functions::get_rnd_u8_range(0, characters.len().try_into().unwrap()) as usize;
-            if let Some(rnd_char) = characters.chars().nth(rnd_char_index) {
-                random_character = (rnd_char.to_string());
-            }
-
-            if self.on_whitespace_timeout {
-                random_character = " ".to_string();
-            }
+        for _i in 0..row_count {
+            let mut random_character = functions::get_random_character(self.on_whitespace_timeout);
 
             self.update_column_state();
+
             self.char_queue.push_back(random_character);
         }
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.char_queue.is_empty()
     }
 
     pub fn print_all(&self) {
@@ -49,7 +37,6 @@ impl Col {
             println!("Queue is empty.");
         } 
         else {
-            println!("Queue contents:");
             for (i, item) in self.char_queue.iter().enumerate() {
                 println!("{}: {}", i, item);
             }
@@ -57,7 +44,6 @@ impl Col {
     }
 
     pub fn update_column_state(&mut self) {
-        let before: u8 = self.seq_len;
         self.seq_len = self.seq_len - 1;
 
         if self.seq_len <= 0 {
@@ -69,7 +55,6 @@ impl Col {
     }
 
     pub fn switch_timeout(&mut self) {
-        let before: bool = self.on_whitespace_timeout;
         self.on_whitespace_timeout = !self.on_whitespace_timeout;
     }
 }
