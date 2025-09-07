@@ -1,7 +1,9 @@
 mod structs;
 mod support;
 
-use std::{io, thread, time};
+use std::{thread, time::Duration};
+use crossterm::{execute, terminal::{Clear, ClearType}, cursor::MoveTo};
+use std::{io::stdin, io::stdout, io::Write};
 use std::collections::HashMap;
 use std::collections::VecDeque;
 use crate::support::functions;
@@ -37,9 +39,6 @@ fn main() {
 
     for _i in 0..50 {
         for _r in 0u16..row_count {
-            // Before processing a new row, clear the terminal content
-            std::process::Command::new("clear").status().unwrap();
-
             // Create row content and update column states
             let mut row_content: String = "".to_string();
             for c in 0u16..column_count {
@@ -62,10 +61,13 @@ fn main() {
                 for (_i, item) in row_manager.iter().enumerate() {
                     matrix_console = matrix_console + item + "\n";
                 }
-                println!("{}", matrix_console.green());
 
-                let sleep_timer = time::Duration::from_millis(250);
-                thread::sleep(sleep_timer);
+                // Set cursor to start of console to overwrite all content
+                let mut stdout = stdout();
+                execute!(stdout, MoveTo(0, 0)).unwrap();
+                println!("{}", matrix_console.green());
+                stdout.flush().unwrap();
+                thread::sleep(Duration::from_millis(250));
 
                 row_manager.pop_back();
             }
@@ -73,7 +75,7 @@ fn main() {
     }
 
     // Keep the console open
-    let stdin = io::stdin();
+    let stdin = stdin();
     let input = &mut String::new();
     loop {
         input.clear();
