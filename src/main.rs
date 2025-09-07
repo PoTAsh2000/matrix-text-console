@@ -1,7 +1,9 @@
 mod structs;
 mod support;
 
-use std::{io, thread, time};
+use std::{thread, time::Duration};
+use crossterm::{execute, terminal::{Clear, ClearType}, cursor::MoveTo};
+use std::{io::stdin, io::stdout, io::Write};
 use std::collections::HashMap;
 use std::collections::VecDeque;
 use crate::support::functions;
@@ -10,12 +12,17 @@ use structs::col::WHITESPACE_SEQ_LEN_MIN_MAX;
 use structs::col::CHARACTER_SEQ_LEN_MIN_MAX;
 use colored::Colorize;
 
+/*
+* TODOs / ideas
+* Make every character sequence and characters indipendant structs. So they can have their own styling (sequence fading out over time, or white highliting a char that got changed)
+*/
+
 fn main() {
     std::process::Command::new("clear").status().unwrap();
     
     // Setting the amount for rows and columns
-    let row_count: u16 = 40;
-    let column_count: u16 = 150;
+    let row_count: u16 = 70;
+    let column_count: u16 =209;
 
     // Initiating column data
     let mut column_data_map: HashMap<u16, Col> = HashMap::new();
@@ -37,16 +44,24 @@ fn main() {
 
     for _i in 0..50 {
         for _r in 0u16..row_count {
-            // Before processing a new row, clear the terminal content
-            std::process::Command::new("clear").status().unwrap();
-
             // Create row content and update column states
             let mut row_content: String = "".to_string();
             for c in 0u16..column_count {
                 // Create row content
                 let mut current_column: Col = column_data_map.get(&c).unwrap().clone();
+                let mut new_char_queue: VecDeque<String> = VecDeque::new(); // Create a new queue in case a character in the queue has changed
+
                 if let Some(queue_value) = current_column.char_queue.pop_front() {
-                    row_content = row_content + &queue_value;
+                    let mut character_to_display: String = queue_value;
+
+                    let rnd_number = functions::get_rnd_u8_range(0, 4);
+                    if (rnd_number == 0) && (!current_column.on_whitespace_timeout) {
+                        character_to_display = functions::get_random_character(current_column.on_whitespace_timeout);
+                        new_char_queue.push_back(character_to_display.clone());
+                    }
+
+                    current_column.char_queue = new_char_queue;
+                    row_content = row_content + &character_to_display;
                 }
 
                 // Update column state
@@ -62,10 +77,13 @@ fn main() {
                 for (_i, item) in row_manager.iter().enumerate() {
                     matrix_console = matrix_console + item + "\n";
                 }
-                println!("{}", matrix_console.green());
 
-                let sleep_timer = time::Duration::from_millis(250);
-                thread::sleep(sleep_timer);
+                // Set cursor to start of console to overwrite all content
+                let mut stdout = stdout();
+                execute!(stdout, MoveTo(0, 0)).unwrap();
+                println!("{}", matrix_console.green());
+                stdout.flush().unwrap();
+                thread::sleep(Duration::from_millis(250));
 
                 row_manager.pop_back();
             }
@@ -73,7 +91,7 @@ fn main() {
     }
 
     // Keep the console open
-    let stdin = io::stdin();
+    let stdin = stdin();
     let input = &mut String::new();
     loop {
         input.clear();
