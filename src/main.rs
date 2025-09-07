@@ -48,7 +48,6 @@ fn main() {
                 let mut new_char_queue: VecDeque<String> = VecDeque::new(); // Create a new queue in case a character in the queue has changed
 
                 if let Some(queue_value) = current_column.char_queue.pop_front() {
-                    let before: String = queue_value.clone();
                     let mut character_to_display: String = queue_value;
 
                     let rnd_number = functions::get_rnd_u8_range(0, 4);
@@ -74,7 +73,7 @@ fn main() {
                 for (_i, item) in row_manager.iter().enumerate() {
                     matrix_console = matrix_console + item + "\n";
                 }
-                println!("{}", matrix_console.green());
+                println!("{}", matrix_console.dimmed().bold().green());
 
                 let sleep_timer = time::Duration::from_millis(250);
                 thread::sleep(sleep_timer);

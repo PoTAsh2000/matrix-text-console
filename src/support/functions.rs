@@ -11,7 +11,7 @@ pub fn get_rnd_bool() -> bool {
 }
 
 pub fn get_random_character (on_whitespace_timeout: bool) -> String {
-    let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".to_string();
+    let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789{}[]()#$%^&?<>".to_string();
     
     let mut random_character = "".to_string();
     let rnd_char_index: usize = get_rnd_u8_range(0, characters.len().try_into().unwrap()) as usize;
