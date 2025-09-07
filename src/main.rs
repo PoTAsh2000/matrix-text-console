@@ -12,6 +12,11 @@ use structs::col::WHITESPACE_SEQ_LEN_MIN_MAX;
 use structs::col::CHARACTER_SEQ_LEN_MIN_MAX;
 use colored::Colorize;
 
+/*
+* TODOs / ideas
+* Make every character sequence and characters indipendant structs. So they can have their own styling (sequence fading out over time, or white highliting a char that got changed)
+*/
+
 fn main() {
     std::process::Command::new("clear").status().unwrap();
     
