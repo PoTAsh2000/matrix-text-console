@@ -16,8 +16,8 @@ fn main() {
     std::process::Command::new("clear").status().unwrap();
     
     // Setting the amount for rows and columns
-    let row_count: u16 = 40;
-    let column_count: u16 = 150;
+    let row_count: u16 = 70;
+    let column_count: u16 =209;
 
     // Initiating column data
     let mut column_data_map: HashMap<u16, Col> = HashMap::new();
@@ -44,8 +44,19 @@ fn main() {
             for c in 0u16..column_count {
                 // Create row content
                 let mut current_column: Col = column_data_map.get(&c).unwrap().clone();
+                let mut new_char_queue: VecDeque<String> = VecDeque::new(); // Create a new queue in case a character in the queue has changed
+
                 if let Some(queue_value) = current_column.char_queue.pop_front() {
-                    row_content = row_content + &queue_value;
+                    let mut character_to_display: String = queue_value;
+
+                    let rnd_number = functions::get_rnd_u8_range(0, 4);
+                    if (rnd_number == 0) && (!current_column.on_whitespace_timeout) {
+                        character_to_display = functions::get_random_character(current_column.on_whitespace_timeout);
+                        new_char_queue.push_back(character_to_display.clone());
+                    }
+
+                    current_column.char_queue = new_char_queue;
+                    row_content = row_content + &character_to_display;
                 }
 
                 // Update column state
