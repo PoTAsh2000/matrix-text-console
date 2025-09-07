@@ -3,8 +3,8 @@ mod support;
 use crate::functions;
 use std::collections::VecDeque;
 
-pub static WHITESPACE_SEQ_LEN_MIN_MAX: [u8; 2] = [4, 8];
-pub static CHARACTER_SEQ_LEN_MIN_MAX: [u8; 2] = [5, 9];
+pub static WHITESPACE_SEQ_LEN_MIN_MAX: [u8; 2] = [5, 10];
+pub static CHARACTER_SEQ_LEN_MIN_MAX: [u8; 2] = [8, 12];
 
 #[derive(Clone)]
 pub struct Col {
