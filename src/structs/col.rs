@@ -1,58 +1,43 @@
-#[path = "../support/functions.rs"]
-mod support;
-use crate::functions;
-use std::collections::VecDeque;
-
-pub static WHITESPACE_SEQ_LEN_MIN_MAX: [u8; 2] = [5, 10];
-pub static CHARACTER_SEQ_LEN_MIN_MAX: [u8; 2] = [8, 12];
+use crate::enums::sequence::SequenceType;
+use crate::support::functions;
 
 #[derive(Clone)]
-pub struct Col {
-    pub char_queue: VecDeque<String>,
-    pub seq_len: u8,
-    pub on_whitespace_timeout: bool,
+pub struct ColumnInformation {
+    pub sequence_type: SequenceType,
+    pub swap_timer: u8,
 }
 
-impl Col {
-    pub fn new(seq_len: u8, timeout: bool) -> Self {
+impl ColumnInformation {
+    pub fn new(initial_sequence_type: SequenceType, intial_swap_timer: u8) -> Self {
         Self {
-            char_queue: VecDeque::new(),
-            seq_len: seq_len,
-            on_whitespace_timeout:timeout,
+            sequence_type: initial_sequence_type,
+            swap_timer: intial_swap_timer,
         }
     }
 
-    pub fn initiate_queue(&mut self, row_count: u16) {
-        for _i in 0..row_count {
-            let random_character = functions::get_random_character(self.on_whitespace_timeout);
 
-            self.update_column_state();
-
-            self.char_queue.push_back(random_character);
+    pub fn random_sequence_type() -> SequenceType {
+        let random_value: u8 = functions::get_rnd_u8_range(0, 2);
+        if random_value == 0 {
+            return SequenceType::Character;
         }
+        return SequenceType::Whitespace;
     }
 
-    pub fn print_all(&self, row: u16, column: u16) {
-        let mut queue_values: String = "".to_string();
-        for (_i, item) in self.char_queue.iter().enumerate() {
-            queue_values = queue_values + item;
+
+    pub fn update_column_information(&mut self) {
+        self.swap_timer = self.swap_timer - 1;
+
+        if self.swap_timer == 0 {
+            if self.sequence_type == SequenceType::Whitespace {
+                self.sequence_type = SequenceType::Character;
+                self.swap_timer = functions::get_rnd_u8_range(6, 13);
+            }
+            else {
+                self.sequence_type = SequenceType::Whitespace;
+                self.swap_timer = functions::get_rnd_u8_range(4, 10);
+            }
         }
-        println!("queue on row[{}], column[{}]: {}",row, column, queue_values);
-    }
-
-    pub fn update_column_state(&mut self) {
-        self.seq_len = self.seq_len - 1;
-
-        if self.seq_len <= 0 {
-            self.switch_timeout();
-            self.seq_len = 
-                if self.on_whitespace_timeout { functions::get_rnd_u8_range(WHITESPACE_SEQ_LEN_MIN_MAX[0], WHITESPACE_SEQ_LEN_MIN_MAX[1]) } 
-                else { functions::get_rnd_u8_range(CHARACTER_SEQ_LEN_MIN_MAX[0], CHARACTER_SEQ_LEN_MIN_MAX[1]) };
-        }
-    }
-
-    pub fn switch_timeout(&mut self) {
-        self.on_whitespace_timeout = !self.on_whitespace_timeout;
     }
 }
 
