@@ -13,7 +13,7 @@ use crossterm::{
     cursor,
     terminal::{size, EnterAlternateScreen, LeaveAlternateScreen, Clear, ClearType},
 };
-use colored::Colorize;
+use colored::{Colorize, Color};
 
 fn main() -> io::Result<()> {
     let mut stdout = stdout();
@@ -28,28 +28,24 @@ fn main() -> io::Result<()> {
 
     let mut column_information_map: HashMap<u16, ColumnInformation> = initalize_column_data_map(col_count);
 
-    let mut console_content: Vec<Vec<ColoredChar>> = Vec::new();
+    let mut console_content: Vec<String> = Vec::new();
     loop {
         for _r in 0u16..row_count {
-            let mut row_buffer: Vec<ColoredChar> = Vec::new();
+            let mut row_buffer: String = "".to_string();
 
             for c in 0u16..col_count {
                 let mut column_information: ColumnInformation = column_information_map.get(&c)
                     .expect("Column information must exist for column")
                     .clone();
 
-                let char_str = functions::get_random_character(&column_information);
-                let character = char_str.chars().next().unwrap_or(' ');
-                
-                // You can customize the color logic here based on your needs
-                let color = get_character_color(&column_information, character);
-                
-                row_buffer.push(ColoredChar::new(character, color));
+                let character = functions::get_random_character(&column_information);
+                row_buffer = row_buffer + &character;
 
                 let _ = column_information.update_column_information();
                 column_information_map.remove(&c);
                 column_information_map.insert(c, column_information);
             }
+
 
             console_content.insert(0, row_buffer);
             if console_content.len() > row_count.into() {
@@ -58,15 +54,9 @@ fn main() -> io::Result<()> {
                 execute!(stdout, Clear(ClearType::All), cursor::MoveTo(0, 0)).unwrap();
                 for (row, row_content) in console_content.iter().enumerate() {
                     execute!(stdout, cursor::MoveTo(0, row as u16)).unwrap();
-                    
-                    // Print each character with its individual color
-                    for colored_char in row_content {
-                        print!("{}", colored_char.character.to_string().color(colored_char.color).dimmed());
-                    }
-                    
-                    stdout.flush().unwrap();
+                    println!("{}", row_content.green().dimmed());
                 }
-
+                stdout.flush().unwrap();
                 thread::sleep(Duration::from_millis(95));
             }
         }
@@ -74,6 +64,15 @@ fn main() -> io::Result<()> {
 
     Ok(())
 }
+
+
+// fn get_character_color() -> Color {
+//     let rnd: u8 = functions::get_rnd_u8_range(0, 11);
+//     if rnd < 10 {
+//         return Color::Green;
+//     }
+//     return Color::BrightGreen;
+// }
 
 
 fn initalize_column_data_map(col_count: u16) -> HashMap<u16, ColumnInformation> {
