@@ -15,33 +15,24 @@ use crate::structs::{
 use std::{
     thread,
     time::Duration,
-    collections::{ HashMap, VecDeque },
-    io:: { self, Write, BufWriter, stdout }
+    collections::HashMap,
+    io:: { Write, BufWriter, stdout }
 };
 
 use crossterm::{
-    execute, cursor,
-    cursor::{MoveTo, Hide},
+    execute,
+    cursor::Hide,
     terminal::{ Clear, ClearType, EnterAlternateScreen, size }, 
 };
 
-use colored::{ Colorize, Color };
-
-/*
-* TODOs / ideas
-* Make every character sequence and characters indipendant structs. So they can have their own styling (sequence fading out over time, or white highliting a char that got changed)
-*/
+use colored::Colorize;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut stdout = stdout();
     let mut buf_writer = BufWriter::new(stdout.lock());
-    let (row_count, column_count) = prepare_console();
+    let (_row_count, column_count) = prepare_console();
 
-    let mut console_content: Vec<Vec<ColouredChar>> = Vec::new();
     let mut column_information_map: HashMap<u16, ColumnInformation> = initalize_column_data_map(column_count);
-
-    let mut rows_on_screen: u16 = 0;
-    let mut characters_on_screen: VecDeque<ColouredChar> = VecDeque::new();
     loop {
         write!(stdout, "\x1b[H").unwrap();
         write!(stdout, "\x1b[1L").unwrap();
@@ -55,14 +46,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let character_color = random_character_colour(&column_information);
             let coloured_character = ColouredChar::new(character.clone(), character_color.clone());
             
-            if character_color == AllowedColours::BrightGreen { 
-                write!(buf_writer, "{}", character.bright_green())?; 
+            if coloured_character.colour == AllowedColours::BrightGreen { 
+                write!(buf_writer, "{}", coloured_character.value.bright_green())?; 
             }
-            if character_color == AllowedColours::BrightGreenDimmed { 
-                write!(buf_writer, "{}", character.bright_green().dimmed())?; 
+            if coloured_character.colour == AllowedColours::BrightGreenDimmed { 
+                write!(buf_writer, "{}", coloured_character.value.bright_green().dimmed())?; 
             }
-            if character_color == AllowedColours::GreenDimmed { 
-                write!(buf_writer, "{}", character.green().dimmed())?; 
+            if coloured_character.colour == AllowedColours::GreenDimmed { 
+                write!(buf_writer, "{}", coloured_character.value.green().dimmed())?; 
             }
 
             let _ = column_information.update_column_information();
@@ -73,20 +64,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         buf_writer.flush()?;
         thread::sleep(Duration::from_millis(70));
     }
-
-    Ok::<(), Box<dyn std::error::Error>>(());
 }
 
 fn prepare_console() -> (u16, u16) {
     let mut stdout = stdout();
 
     // Clear the console content
-    execute!(stdout, Hide);
-    execute!(stdout, Clear(ClearType::All));
-    execute!(stdout, EnterAlternateScreen).unwrap();
+    let _ = execute!(stdout, Hide);
+    let _ = execute!(stdout, Clear(ClearType::All));
+    let _ = execute!(stdout, EnterAlternateScreen).unwrap();
 
     // Set console size to the maximum terminals size
-    let (mut column_count, mut rows_count) = size().unwrap();
+    let (column_count, mut rows_count) = size().unwrap();
 
     print!("\x1b[8;{};{}t", rows_count, column_count);
 

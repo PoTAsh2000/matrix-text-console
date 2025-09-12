@@ -8,11 +8,6 @@ pub fn get_rnd_u8_range(start: u8, end: u8) -> u8 {
     return random.random_range(start..end);
 }
 
-pub fn get_rnd_bool() -> bool {
-    let random_bit = get_rnd_u8_range(0, 2);
-    return random_bit != 0;
-}
-
 pub fn get_random_character(column_information: &ColumnInformation) -> String {
     if column_information.sequence_type == SequenceType::Whitespace {
         return " ".to_string();
