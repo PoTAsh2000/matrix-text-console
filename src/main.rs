@@ -2,22 +2,34 @@ mod structs;
 mod enums;
 mod support;
 
-use support::functions;
-use enums::sequence::SequenceType;
-use structs::col::ColumnInformation;
-use std::collections::HashMap;
-use std::io::{self, Write, stdout};
-use std::{thread, time::Duration};
-use crossterm::{
-    execute,
-    cursor,
-    terminal::{size, EnterAlternateScreen, LeaveAlternateScreen, Clear, ClearType},
+use crate::support::functions;
+use crate::enums::sequence::SequenceType;
+use crate::structs::col::ColumnInformation;
+
+use std::{
+    thread,
+    time::Duration,
+    collections::{ HashMap, VecDeque },
+    io:: { self, Write, stdout }
 };
-use colored::{Colorize, Color};
 
-fn main() -> io::Result<()> {
+use crossterm::{
+    execute, cursor,
+    cursor::MoveTo,
+    terminal::{
+        Clear, ClearType, EnterAlternateScreen, size
+    }, 
+};
+
+use colored::Colorize;
+
+/*
+* TODOs / ideas
+* Make every character sequence and characters indipendant structs. So they can have their own styling (sequence fading out over time, or white highliting a char that got changed)
+*/
+
+fn main() {
     let mut stdout = stdout();
-
     std::process::Command::new("clear").status().unwrap();
     execute!(stdout, EnterAlternateScreen).unwrap();
 
@@ -56,24 +68,14 @@ fn main() -> io::Result<()> {
                     execute!(stdout, cursor::MoveTo(0, row as u16)).unwrap();
                     println!("{}", row_content.green().dimmed());
                 }
-                stdout.flush().unwrap();
+                io::stdout().flush().unwrap();
                 thread::sleep(Duration::from_millis(95));
             }
         }
     }
 
-    Ok(())
+    // Ok(())
 }
-
-
-// fn get_character_color() -> Color {
-//     let rnd: u8 = functions::get_rnd_u8_range(0, 11);
-//     if rnd < 10 {
-//         return Color::Green;
-//     }
-//     return Color::BrightGreen;
-// }
-
 
 fn initalize_column_data_map(col_count: u16) -> HashMap<u16, ColumnInformation> {
     let mut column_information_map: HashMap<u16, ColumnInformation> = HashMap::new();
