@@ -43,6 +43,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut rows_on_screen: u16 = 0;
     let mut characters_on_screen: VecDeque<ColouredChar> = VecDeque::new();
     loop {
+        write!(stdout, "\x1b[H").unwrap();
+        write!(stdout, "\x1b[1L").unwrap();
+
         for c in 0u16..column_count {
             let mut column_information: ColumnInformation = column_information_map.get(&c)
                 .expect("Column information must exist for column")
@@ -68,7 +71,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         buf_writer.flush()?;
-        thread::sleep(Duration::from_millis(110));
+        thread::sleep(Duration::from_millis(70));
     }
 
     Ok::<(), Box<dyn std::error::Error>>(());
