@@ -4,13 +4,15 @@ use crate::support::functions;
 #[derive(Clone)]
 pub struct ColumnInformation {
     pub sequence_type: SequenceType,
+    pub sequence_started: bool,
     pub swap_timer: u8,
 }
 
 impl ColumnInformation {
-    pub fn new(initial_sequence_type: SequenceType, intial_swap_timer: u8) -> Self {
+    pub fn new(initial_sequence_type: SequenceType, initial_sequence_started: bool, intial_swap_timer: u8) -> Self {
         Self {
             sequence_type: initial_sequence_type,
+            sequence_started: initial_sequence_started,
             swap_timer: intial_swap_timer,
         }
     }
@@ -27,15 +29,17 @@ impl ColumnInformation {
 
     pub fn update_column_information(&mut self) {
         self.swap_timer = self.swap_timer - 1;
+        self.sequence_started = false;
 
         if self.swap_timer == 0 {
             if self.sequence_type == SequenceType::Whitespace {
+                self.sequence_started = true;
                 self.sequence_type = SequenceType::Character;
-                self.swap_timer = functions::get_rnd_u8_range(6, 13);
+                self.swap_timer = functions::get_rnd_u8_range(6, 16);
             }
             else {
                 self.sequence_type = SequenceType::Whitespace;
-                self.swap_timer = functions::get_rnd_u8_range(4, 10);
+                self.swap_timer = functions::get_rnd_u8_range(6, 18);
             }
         }
     }
