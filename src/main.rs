@@ -113,17 +113,18 @@ fn initalize_column_data_map(col_count: u16) -> HashMap<u16, ColumnInformation> 
                     functions::get_rnd_u8_range(6, 18)
                 )
             );
+            
+            continue;
         }
-        else {
-            column_information_map.insert(
-                col_index.try_into().unwrap(),
-                ColumnInformation::new(
-                    starting_type,
-                    true,
-                    functions::get_rnd_u8_range(6, 16)
-                )
-            );
-        }
+        
+        column_information_map.insert(
+            col_index.try_into().unwrap(),
+            ColumnInformation::new(
+                starting_type,
+                true,
+                functions::get_rnd_u8_range(6, 16)
+            )
+        );
     }
 
     return column_information_map;
