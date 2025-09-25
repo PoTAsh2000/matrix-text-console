@@ -1,4 +1,5 @@
-*.exe
-*.pdb
-Cargo.lock
-target/
+
+target/*
+!target/debug/
+target/debug/*
+!target/debug/matrix-text-console.exe
