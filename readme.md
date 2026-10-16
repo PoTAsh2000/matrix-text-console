@@ -2,6 +2,30 @@
 
 The console contains multiple columns of. In each a column a sequence of green characters will be moving downwards.
 
+## Install
+Requires [Rust](https://www.rust-lang.org/tools/install) (includes `cargo`).
+
+```sh
+git clone <repository-url>
+cd matrix-text-console
+cargo build --release
+```
+
+The binary is written to `target/release/matrix-text-console` (`.exe` on Windows).
+
+## Usage
+```sh
+cargo run --release
+```
+
+Or run the built binary directly:
+
+```sh
+./target/release/matrix-text-console
+```
+
+Press `q`, `Esc` or `Ctrl-C` to quit. See [Controls](#controls).
+
 ## Console Attributes
 * Consolse contains only green characters
 * Characters (Character sequence - CS) will always be in a sequence, never single characters move downwards
