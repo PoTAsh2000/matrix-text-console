@@ -1,4 +1,8 @@
-#![allow(clippy::cast_precision_loss, clippy::cast_sign_loss, clippy::doc_markdown)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_sign_loss,
+    clippy::doc_markdown
+)]
 //! Frame pipeline benchmark. Run inside a real console window:
 //!   perf_bench --fps 14 --secs 8 --out result.txt
 //!   perf_bench --fps 0 --delay-ms 2500        (unlimited = throughput ceiling)
