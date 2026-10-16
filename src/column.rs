@@ -5,7 +5,7 @@ const SPEED: (f32, f32) = (7.0, 14.0);
 /// Length of the trail in rows.
 const TRAIL: (f32, f32) = (6.0, 16.0);
 /// Empty rows between two streams.
-const GAP: (f32, f32) = (6.0, 18.0);
+const GAP: (f32, f32) = (0.0, 3.0);
 
 /// One falling stream: a moving head with a fading trail behind it.
 #[derive(Clone, Debug)]
