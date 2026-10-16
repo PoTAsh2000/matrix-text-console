@@ -8,3 +8,7 @@ The console contains multiple columns of. In each a column a sequence of green c
 * White spaces (Break sequence - BC) will also be moving downwards in sequences
 * The characters in the CS can change value, but the length of the sequence will stay the same until its of the screen
 * Characters in the CS will slowly fade out over time
+
+## Controls
+* `q`, `Esc` or `Ctrl-C` quits and restores the terminal
+* The window is maximized at start when the terminal supports it
