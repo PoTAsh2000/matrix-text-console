@@ -29,9 +29,14 @@ impl Rng {
         ((u64::from(self.next_u32()) * u64::from(bound)) >> 32) as u32
     }
 
+    /// Random value in `0.0..1.0`.
+    pub fn unit(&mut self) -> f32 {
+        (self.next_u32() >> 8) as f32 / 16_777_216.0
+    }
+
     /// Random value in `start..end`.
-    pub fn range(&mut self, start: u8, end: u8) -> u8 {
-        start + self.below(u32::from(end - start)) as u8
+    pub fn range_f32(&mut self, start: f32, end: f32) -> f32 {
+        start + self.unit() * (end - start)
     }
 }
 
@@ -46,8 +51,14 @@ mod tests {
     }
 
     #[test]
-    fn range_stays_in_range() {
+    fn unit_stays_in_unit_range() {
         let mut rng = Rng::from_seed(42);
-        assert!((0..1000).all(|_| (6..18).contains(&rng.range(6, 18))));
+        assert!((0..1000).all(|_| (0.0..1.0).contains(&rng.unit())));
+    }
+
+    #[test]
+    fn range_f32_stays_in_range() {
+        let mut rng = Rng::from_seed(42);
+        assert!((0..1000).all(|_| (6.0..18.0).contains(&rng.range_f32(6.0, 18.0))));
     }
 }

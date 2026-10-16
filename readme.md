@@ -12,3 +12,8 @@ The console contains multiple columns of. In each a column a sequence of green c
 ## Controls
 * `q`, `Esc` or `Ctrl-C` quits and restores the terminal
 * The window is maximized at start when the terminal supports it
+
+## Rendering
+* Glyphs stay in place; each column has a moving head with its own speed (7-14 rows/s)
+* The head is white and the trail fades from bright to dark green
+* Truecolor is used when `COLORTERM` or Windows Terminal announces it, otherwise 256 colours
