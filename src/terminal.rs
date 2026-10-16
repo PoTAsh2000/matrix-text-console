@@ -41,9 +41,9 @@ impl TerminalGuard {
         Ok(guard)
     }
 
-    /// Current terminal width.
-    pub fn width() -> io::Result<u16> {
-        size().map(|(width, _height)| width)
+    /// Current terminal size as width and height.
+    pub fn size() -> io::Result<(u16, u16)> {
+        size()
     }
 
     /// Clears the screen, used after a resize.

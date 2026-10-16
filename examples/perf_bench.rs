@@ -4,7 +4,7 @@
     clippy::doc_markdown
 )]
 //! Frame pipeline benchmark. Run inside a real console window:
-//!   perf_bench --fps 14 --secs 8 --out result.txt
+//!   perf_bench --fps 30 --secs 8 --out result.txt
 //!   perf_bench --fps 0 --delay-ms 2500        (unlimited = throughput ceiling)
 //!
 //! Metrics: fill (buffer built), flush (host accepted bytes), ack (host parsed
@@ -23,7 +23,7 @@ use crossterm::{
     execute,
     terminal::{self, Clear, ClearType, EnterAlternateScreen, size},
 };
-use matrix_text_console::{rain::Rain, rng::Rng};
+use matrix_text_console::{palette::ColorMode, rain::Rain, rng::Rng, screen::Screen};
 
 const WARM_UP_FRAMES: usize = 6;
 
@@ -80,8 +80,14 @@ fn main() -> io::Result<()> {
     let (cols, rows) = size()?;
     terminal::enable_raw_mode()?;
 
-    let mut rain = Rain::new(cols, Rng::from_time());
-    let mut frame = Vec::with_capacity(usize::from(cols) * 16);
+    let mode = match arg("--color", "auto").as_str() {
+        "truecolor" => ColorMode::TrueColor,
+        "256" => ColorMode::Ansi256,
+        _ => ColorMode::detect(),
+    };
+    let mut rain = Rain::new(cols, rows, Rng::from_time());
+    let mut screen = Screen::new(rain.width(), rain.height(), mode);
+    let mut frame = Vec::with_capacity(usize::from(cols) * usize::from(rows));
     let period = (fps > 0.0).then(|| Duration::from_secs_f64(1.0 / fps));
     let mut next_deadline = Instant::now();
     let (mut fill, mut flush, mut ack, mut bytes) = (vec![], vec![], vec![], vec![]);
@@ -95,8 +101,8 @@ fn main() -> io::Result<()> {
         if sync {
             frame.extend_from_slice(b"\x1b[?2026h");
         }
-        frame.extend_from_slice(b"\x1b[H\x1b[1L");
-        rain.write_row(&mut frame);
+        rain.step(1.0 / 30.0);
+        screen.draw(&rain, &mut frame);
         if sync {
             frame.extend_from_slice(b"\x1b[?2026l");
         }

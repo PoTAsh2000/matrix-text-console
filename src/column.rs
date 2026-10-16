@@ -1,59 +1,66 @@
 use crate::rng::Rng;
 
-/// What a column currently emits.
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum SequenceKind {
-    Glyphs,
-    Gap,
-}
+/// Fall speed in rows per second.
+const SPEED: (f32, f32) = (7.0, 14.0);
+/// Length of the trail in rows.
+const TRAIL: (f32, f32) = (6.0, 16.0);
+/// Empty rows between two streams.
+const GAP: (f32, f32) = (6.0, 18.0);
 
-const GLYPH_LENGTH: (u8, u8) = (6, 16);
-const GAP_LENGTH: (u8, u8) = (6, 18);
-
-/// State of one falling column.
+/// One falling stream: a moving head with a fading trail behind it.
 #[derive(Clone, Debug)]
 pub struct Column {
-    pub kind: SequenceKind,
-    /// True for the first cell of a glyph sequence.
-    pub sequence_start: bool,
-    remaining: u8,
+    /// Row position of the head; negative while waiting to start.
+    head: f32,
+    speed: f32,
+    trail: f32,
+    /// Last row that received a glyph.
+    pub spawned: i32,
 }
 
 impl Column {
-    pub fn random(rng: &mut Rng) -> Self {
-        if rng.range(0, 2) == 0 {
-            Self::glyphs(true, rng)
-        } else {
-            Self::gap(rng)
-        }
+    pub fn new(rng: &mut Rng) -> Self {
+        let mut column = Self {
+            head: 0.0,
+            speed: 0.0,
+            trail: 0.0,
+            spawned: 0,
+        };
+        column.restart(rng);
+        column
     }
 
-    fn glyphs(sequence_start: bool, rng: &mut Rng) -> Self {
-        Self {
-            kind: SequenceKind::Glyphs,
-            sequence_start,
-            remaining: rng.range(GLYPH_LENGTH.0, GLYPH_LENGTH.1),
-        }
+    fn restart(&mut self, rng: &mut Rng) {
+        self.speed = rng.range_f32(SPEED.0, SPEED.1);
+        self.trail = rng.range_f32(TRAIL.0, TRAIL.1);
+        self.head = -rng.range_f32(GAP.0, GAP.1);
+        self.spawned = self.lead_row();
     }
 
-    fn gap(rng: &mut Rng) -> Self {
-        Self {
-            kind: SequenceKind::Gap,
-            sequence_start: false,
-            remaining: rng.range(GAP_LENGTH.0, GAP_LENGTH.1),
-        }
+    /// Brightness lost per second by the glyphs of this stream.
+    pub fn decay(&self) -> f32 {
+        self.speed / self.trail
     }
 
-    /// Moves one cell down and switches sequence when it ends.
-    pub fn advance(&mut self, rng: &mut Rng) {
-        self.remaining -= 1;
-        self.sequence_start = false;
+    pub fn trail_rows(&self) -> i32 {
+        self.trail as i32
+    }
 
-        if self.remaining == 0 {
-            *self = match self.kind {
-                SequenceKind::Gap => Self::glyphs(true, rng),
-                SequenceKind::Glyphs => Self::gap(rng),
-            };
+    /// Row the head is in.
+    pub fn lead_row(&self) -> i32 {
+        self.head.floor() as i32
+    }
+
+    /// How far the head is into its row, `0.0..1.0`.
+    pub fn fraction(&self) -> f32 {
+        self.head - self.head.floor()
+    }
+
+    /// Moves the head; starts a new stream when the trail has left the screen.
+    pub fn advance(&mut self, seconds: f32, height: usize, rng: &mut Rng) {
+        self.head += self.speed * seconds;
+        if self.head - self.trail > height as f32 {
+            self.restart(rng);
         }
     }
 }
@@ -63,30 +70,36 @@ mod tests {
     use super::*;
 
     #[test]
-    fn sequences_alternate() {
-        let mut rng = Rng::from_seed(7);
-        let mut column = Column::gap(&mut rng);
-        let mut starts = 0;
+    fn new_stream_waits_above_screen() {
+        let mut rng = Rng::from_seed(3);
         for _ in 0..200 {
-            column.advance(&mut rng);
-            if column.sequence_start {
-                starts += 1;
-                assert_eq!(column.kind, SequenceKind::Glyphs);
-            }
+            let column = Column::new(&mut rng);
+            assert!(column.lead_row() < 0);
+            assert!((SPEED.0..SPEED.1).contains(&column.speed));
         }
-        assert!(starts > 0);
     }
 
     #[test]
-    fn lengths_stay_in_range() {
-        let mut rng = Rng::from_seed(7);
-        for _ in 0..500 {
-            let column = Column::random(&mut rng);
-            let (min, max) = match column.kind {
-                SequenceKind::Glyphs => GLYPH_LENGTH,
-                SequenceKind::Gap => GAP_LENGTH,
-            };
-            assert!((min..max).contains(&column.remaining));
+    fn restarts_after_leaving_screen() {
+        let mut rng = Rng::from_seed(3);
+        let mut column = Column::new(&mut rng);
+        let mut restarts = 0;
+        for _ in 0..2000 {
+            let before = column.head;
+            column.advance(0.033, 20, &mut rng);
+            if column.head < before {
+                restarts += 1;
+            }
         }
+        assert!(restarts > 1);
+    }
+
+    #[test]
+    fn head_never_outruns_max_speed() {
+        let mut rng = Rng::from_seed(3);
+        let mut column = Column::new(&mut rng);
+        let before = column.head;
+        column.advance(1.0, 1000, &mut rng);
+        assert!(column.head - before <= SPEED.1);
     }
 }
