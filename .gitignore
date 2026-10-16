@@ -1,5 +1,1 @@
-
-target/*
-!target/debug/
-target/debug/*
-!target/debug/matrix-text-console.exe
+target/
