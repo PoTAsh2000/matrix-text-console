@@ -36,7 +36,8 @@ impl ColorMode {
             Self::TrueColor => color,
             Self::Ansi256 => {
                 let (r, g, b) = cube_index(color);
-                Rgb(CUBE[r], CUBE[g], CUBE[b])
+                // Darkest trail step must stay visible, not snap to black
+                Rgb(CUBE[r], CUBE[g.max(1)], CUBE[b])
             }
         }
     }
@@ -106,6 +107,12 @@ mod tests {
     fn snapping_is_stable() {
         let snapped = ColorMode::Ansi256.snap(shade(0.6, 0.0));
         assert_eq!(ColorMode::Ansi256.snap(snapped), snapped);
+    }
+
+    #[test]
+    fn dimmest_trail_is_never_black_in_256_colours() {
+        let dimmest = ColorMode::Ansi256.snap(shade(0.04, 0.0));
+        assert_ne!(dimmest, Rgb(0, 0, 0));
     }
 
     #[test]
